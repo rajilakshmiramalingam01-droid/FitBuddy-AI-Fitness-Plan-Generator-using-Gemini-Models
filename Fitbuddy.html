@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FitBuddy - AI Fitness Plan Generator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #101820, #1d4d4f);
+            color: white;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 42px;
+            color: #00e6a7;
+        }
+
+        header p {
+            margin-top: 8px;
+            color: #ddd;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.10);
+            padding: 25px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: #00e6a7;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .full {
+            grid-column: 1 / -1;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: #00e6a7;
+            color: #102020;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background: #00c991;
+        }
+
+        #result {
+            display: none;
+        }
+
+        .user-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: rgba(0,0,0,0.25);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .info-box span {
+            display: block;
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .day {
+            background: rgba(0,0,0,0.25);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .day h3 {
+            color: #00e6a7;
+            margin-bottom: 10px;
+        }
+
+        .day p {
+            line-height: 1.6;
+            color: #eee;
+        }
+
+        .tip {
+            background: rgba(0,230,167,0.15);
+            padding: 18px;
+            border-left: 5px solid #00e6a7;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        .success {
+            text-align: center;
+            color: #00e6a7;
+            margin-top: 15px;
+            display: none;
+        }
+
+        @media(max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-info {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            header h1 {
+                font-size: 32px;
+            }
+        }
+
+        @media(max-width: 450px) {
+            .user-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>💪 FitBuddy</h1>
+        <p>AI Fitness Plan Generator</p>
+    </header>
+
+    <!-- USER INPUT -->
+    <div class="card" id="inputCard">
+
+        <h2>Enter Your Fitness Details</h2>
+
+        <div class="form-grid">
+
+            <div class="field">
+                <label>Name</label>
+                <input type="text" id="name" placeholder="Enter your name">
+            </div>
+
+            <div class="field">
+                <label>User ID</label>
+                <input type="text" id="userId" placeholder="Enter User ID">
+            </div>
+
+            <div class="field">
+                <label>Age</label>
+                <input type="number" id="age" placeholder="Enter age">
+            </div>
+
+            <div class="field">
+                <label>Weight (kg)</label>
+                <input type="number" id="weight" placeholder="Enter weight">
+            </div>
+
+            <div class="field">
+                <label>Fitness Goal</label>
+
+                <select id="goal">
+                    <option value="">Select Goal</option>
+                    <option value="Weight Loss">Weight Loss</option>
+                    <option value="Muscle Gain">Muscle Gain</option>
+                    <option value="General Wellness">General Wellness</option>
+                    <option value="Flexibility">Flexibility</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Workout Intensity</label>
+
+                <select id="intensity">
+                    <option value="">Select Intensity</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+
+            <div class="field full">
+                <button onclick="generatePlan()">
+                    🚀 Generate Fitness Plan
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RESULT -->
+    <div class="card" id="result">
+
+        <h2>🏆 Your Personalized Fitness Plan</h2>
+
+        <div class="user-info">
+
+            <div class="info-box">
+                <span>Name</span>
+                <strong id="showName"></strong>
+            </div>
+
+            <div class="info-box">
+                <span>User ID</span>
+                <strong id="showUserId"></strong>
+            </div>
+
+            <div class="info-box">
+                <span>Age</span>
+                <strong id="showAge"></strong>
+            </div>
+
+            <div class="info-box">
+                <span>Weight</span>
+                <strong id="showWeight"></strong> kg
+            </div>
+
+            <div class="info-box">
+                <span>Goal</span>
+                <strong id="showGoal"></strong>
+            </div>
+
+            <div class="info-box">
+                <span>Intensity</span>
+                <strong id="showIntensity"></strong>
+            </div>
+
+        </div>
+
+
+        <h2>📅 7-Day Workout Plan</h2>
+
+        <div id="workoutPlan"></div>
+
+
+        <h2 style="margin-top:25px;">🥗 Nutrition / Recovery Tip</h2>
+
+        <div class="tip" id="nutritionTip"></div>
+
+
+        <h2 style="margin-top:25px;">📝 Update Your Plan</h2>
+
+        <textarea
+            id="feedback"
+            placeholder="Example: Add more cardio, include more rest days...">
+        </textarea>
+
+        <button onclick="updatePlan()">
+            🔄 Update Plan
+        </button>
+
+        <div class="success" id="successMessage">
+            ✅ Your workout plan has been updated!
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function generatePlan() {
+
+    let name = document.getElementById("name").value;
+    let userId = document.getElementById("userId").value;
+    let age = document.getElementById("age").value;
+    let weight = document.getElementById("weight").value;
+    let goal = document.getElementById("goal").value;
+    let intensity = document.getElementById("intensity").value;
+
+    if (!name || !userId || !age || !weight || !goal || !intensity) {
+        alert("Please fill all the details!");
+        return;
+    }
+
+    document.getElementById("showName").innerText = name;
+    document.getElementById("showUserId").innerText = userId;
+    document.getElementById("showAge").innerText = age;
+    document.getElementById("showWeight").innerText = weight;
+    document.getElementById("showGoal").innerText = goal;
+    document.getElementById("showIntensity").innerText = intensity;
+
+    let workout = getWorkoutPlan(goal, intensity);
+
+    let workoutHTML = "";
+
+    workout.forEach(function(day) {
+
+        workoutHTML += `
+            <div class="day">
+
+                <h3>${day.day}</h3>
+
+                <p>
+                    <strong>Warm-up:</strong>
+                    ${day.warmup}
+                </p>
+
+                <p>
+                    <strong>Main Workout:</strong>
+                    ${day.workout}
+                </p>
+
+                <p>
+                    <strong>Cooldown:</strong>
+                    ${day.cooldown}
+                </p>
+
+            </div>
+        `;
+
+    });
+
+    document.getElementById("workoutPlan").innerHTML = workoutHTML;
+
+    document.getElementById("nutritionTip").innerText =
+        getNutritionTip(goal);
+
+    document.getElementById("result").style.display = "block";
+
+    document.getElementById("result").scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+
+function getWorkoutPlan(goal, intensity) {
+
+    let level = intensity.toLowerCase();
+
+    let extra = "";
+
+    if (level === "high") {
+        extra = "Perform 4 sets with 12–15 repetitions.";
+    }
+    else if (level === "medium") {
+        extra = "Perform 3 sets with 10–12 repetitions.";
+    }
+    else {
+        extra = "Perform 2 sets with 8–10 repetitions.";
+    }
+
+    return [
+
+        {
+            day: "Day 1 – Full Body",
+            warmup: "5–10 minutes of light jogging and stretching.",
+            workout: "Squats, push-ups, lunges, jumping jacks. " + extra,
+            cooldown: "5 minutes of slow walking and stretching."
+        },
+
+        {
+            day: "Day 2 – Cardio",
+            warmup: "5 minutes of light walking.",
+            workout: "Jogging, cycling or brisk walking for 20–30 minutes.",
+            cooldown: "Slow walking and full-body stretching."
+        },
+
+        {
+            day: "Day 3 – Upper Body",
+            warmup: "Arm circles and shoulder movements for 5–10 minutes.",
+            workout: "Push-ups, shoulder press, triceps dips and plank. " + extra,
+            cooldown: "Upper-body stretching for 5 minutes."
+        },
+
+        {
+            day: "Day 4 – Recovery",
+            warmup: "Light stretching.",
+            workout: "Yoga, mobility exercises and relaxed walking.",
+            cooldown: "Deep breathing and gentle stretching."
+        },
+
+        {
+            day: "Day 5 – Lower Body",
+            warmup: "5–10 minutes of walking and leg stretching.",
+            workout: "Squats, lunges, calf raises and glute bridges. " + extra,
+            cooldown: "Hamstring and leg stretching."
+        },
+
+        {
+            day: "Day 6 – Core & Cardio",
+            warmup: "Light jogging for 5 minutes.",
+            workout: "Plank, mountain climbers, crunches and 20 minutes cardio.",
+            cooldown: "Slow walking and abdominal stretching."
+        },
+
+        {
+            day: "Day 7 – Rest & Recovery",
+            warmup: "Gentle stretching.",
+            workout: "Rest day with optional light walking.",
+            cooldown: "Relaxation and deep breathing."
+        }
+
+    ];
+}
+
+
+function getNutritionTip(goal) {
+
+    if (goal === "Muscle Gain") {
+
+        return "Include protein-rich foods in your meals such as eggs, beans, fish, chicken or Greek yogurt. Stay hydrated and support your workouts with adequate recovery.";
+
+    }
+
+    if (goal === "Weight Loss") {
+
+        return "Focus on balanced meals with vegetables, protein and whole foods. Stay hydrated and maintain regular physical activity.";
+
+    }
+
+    if (goal === "Flexibility") {
+
+        return "Stay hydrated and include fruits, vegetables and balanced meals. Support flexibility training with adequate rest and recovery.";
+
+    }
+
+    return "Maintain a balanced diet with protein, vegetables, fruits and whole foods. Drink enough water and give your body sufficient recovery time.";
+}
+
+
+function updatePlan() {
+
+    let feedback = document.getElementById("feedback").value;
+
+    if (!feedback.trim()) {
+
+        alert("Please enter your feedback first.");
+
+        return;
+    }
+
+    let plan = document.getElementById("workoutPlan");
+
+    plan.innerHTML += `
+
+        <div class="day">
+
+            <h3>🔄 Updated Plan</h3>
+
+            <p>
+                <strong>Your Feedback:</strong>
+                ${feedback}
+            </p>
+
+            <p>
+                The workout plan has been adjusted based on your
+                preferences. Continue with suitable exercises and
+                allow enough recovery time.
+            </p>
+
+        </div>
+
+    `;
+
+    document.getElementById("successMessage").style.display = "block";
+
+    document.getElementById("feedback").value = "";
+
+}
+
+</script>
+
+</body>
+  </html>
